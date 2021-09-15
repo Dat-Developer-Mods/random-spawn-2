@@ -1,0 +1,18 @@
+[
+    {
+        "modid": "randomspawn2",
+        "name": "Random Spawn 2",
+        "description": "A better mod to randomise where each player spawns",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "https://github.com/jtljac",
+        "updateUrl": "",
+        "authorList": [
+            "jtljac"
+        ],
+        "credits": "",
+        "logoFile": "",
+        "screenshots": [],
+        "dependencies": []
+    }
+]
