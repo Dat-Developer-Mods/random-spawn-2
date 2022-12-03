@@ -11,24 +11,25 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 
 public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
-    public static final Capability<Respawn> RESPAWN_HANDLER = CapabilityManager.get(new CapabilityToken<>(){});
+    public static final Capability<DatRespawn> RESPAWN_HANDLER = CapabilityManager.get(new CapabilityToken<>(){});
 
-    private Respawn respawn = null;
-    private final LazyOptional<Respawn> opt = LazyOptional.of(this::createRespawn);
+    private DatRespawn datRespawn = null;
+    private final LazyOptional<DatRespawn> opt = LazyOptional.of(this::createRespawn);
 
-    private Respawn createRespawn() {
-        if (respawn == null) respawn = new Respawn();
-        return respawn;
+    /**
+     * Create an instance of respawn for this provider if it does not already exist
+     * @return This respawn providers instance
+     */
+    private DatRespawn createRespawn() {
+        if (datRespawn == null) datRespawn = new DatRespawn();
+        return datRespawn;
     }
-
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap) {
@@ -46,11 +47,14 @@ public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
+        DatRespawn datRespawnInstance = createRespawn();
 
-        nbt.putBoolean("bedReset", respawn.bedReset);
+        nbt.putBoolean("bedReset", datRespawnInstance.bedReset);
+
+        // TODO: Switch to just storing 1 blockpos and level
 
         ListTag map = new ListTag();
-        Map<ResourceKey<Level>, BlockPos> respawnPoints = respawn.getRespawnPoints();
+        Map<ResourceKey<Level>, BlockPos> respawnPoints = datRespawnInstance.getRespawnPoints();
         for (ResourceKey<Level> levelKey : respawnPoints.keySet()) {
             CompoundTag store = new CompoundTag();
 
@@ -74,9 +78,10 @@ public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        createRespawn();
+        DatRespawn datRespawnInstance = createRespawn();
+        datRespawnInstance.bedReset = nbt.getBoolean("bedReset");
 
-        respawn.bedReset = nbt.getBoolean("bedReset");
+        // TODO: Switch to just deserializing 1 blockpos and level
 
         for (Tag spawnRaw : nbt.getList("spawn", Tag.TAG_COMPOUND)) {
             CompoundTag spawn = (CompoundTag) spawnRaw;
@@ -86,7 +91,7 @@ public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
 
             CompoundTag pos = spawn.getCompound("pos");
             BlockPos position = new BlockPos(pos.getInt("x"), pos.getInt("y"), pos.getInt("z"));
-            respawn.setRespawnPointForLevel(level, position);
+            datRespawnInstance.setRespawnPointForLevel(level, position);
         }
     }
 }
