@@ -51,27 +51,16 @@ public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
 
         nbt.putBoolean("bedReset", datRespawnInstance.bedReset);
 
-        // TODO: Switch to just storing 1 blockpos and level
+        CompoundTag level = new CompoundTag();
+        level.putString("registry", datRespawnInstance.respawnLevel.registry().toString());
+        level.putString("location", datRespawnInstance.respawnLevel.location().toString());
+        nbt.put("level", level);
 
-        ListTag map = new ListTag();
-        Map<ResourceKey<Level>, BlockPos> respawnPoints = datRespawnInstance.getRespawnPoints();
-        for (ResourceKey<Level> levelKey : respawnPoints.keySet()) {
-            CompoundTag store = new CompoundTag();
-
-            CompoundTag level = new CompoundTag();
-            level.putString("registry", levelKey.registry().toString());
-            level.putString("location", levelKey.location().toString());
-            store.put("level", level);
-
-            CompoundTag pos = new CompoundTag();
-            pos.putInt("x", respawnPoints.get(levelKey).getX());
-            pos.putInt("y", respawnPoints.get(levelKey).getY());
-            pos.putInt("z", respawnPoints.get(levelKey).getZ());
-            store.put("pos", pos);
-
-            map.add(store);
-        }
-        nbt.put("spawn", map);
+        CompoundTag pos = new CompoundTag();
+        pos.putInt("x", datRespawnInstance.respawnPos.getX());
+        pos.putInt("y", datRespawnInstance.respawnPos.getY());
+        pos.putInt("z", datRespawnInstance.respawnPos.getZ());
+        nbt.put("pos", pos);
 
         return nbt;
     }
@@ -81,17 +70,11 @@ public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
         DatRespawn datRespawnInstance = createRespawn();
         datRespawnInstance.bedReset = nbt.getBoolean("bedReset");
 
-        // TODO: Switch to just deserializing 1 blockpos and level
+        CompoundTag levelTag = nbt.getCompound("level");
 
-        for (Tag spawnRaw : nbt.getList("spawn", Tag.TAG_COMPOUND)) {
-            CompoundTag spawn = (CompoundTag) spawnRaw;
-            CompoundTag levelTag = spawn.getCompound("level");
+        datRespawnInstance.respawnLevel = ResourceKey.create(ResourceKey.createRegistryKey(new ResourceLocation(levelTag.getString("registry"))), new ResourceLocation(levelTag.getString("location")));
 
-            ResourceKey<Level> level = ResourceKey.create(ResourceKey.createRegistryKey(new ResourceLocation(levelTag.getString("registry"))), new ResourceLocation(levelTag.getString("location")));
-
-            CompoundTag pos = spawn.getCompound("pos");
-            BlockPos position = new BlockPos(pos.getInt("x"), pos.getInt("y"), pos.getInt("z"));
-            datRespawnInstance.setRespawnPointForLevel(level, position);
-        }
+        CompoundTag pos = nbt.getCompound("pos");
+        datRespawnInstance.respawnPos = new BlockPos(pos.getInt("x"), pos.getInt("y"), pos.getInt("z"));
     }
 }

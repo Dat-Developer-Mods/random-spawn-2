@@ -1,64 +1,44 @@
 package com.datdeveloper.randomspawn2.capability;
 
+import net.minecraft.commands.arguments.ResourceOrTagLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Random;
 
 /**
  * A capability for storing the respawn position in the player
  */
 @AutoRegisterCapability
 public class DatRespawn {
+    static int radius =  5000;
+
     /**
-     * The spawn point for the player
-     * TODO: Change this to just one respawn point
+     * The random source for generating spawn points
      */
-    Map<ResourceKey<Level>, BlockPos> respawnPoints = new HashMap<>();
+    static Random random = new Random();
+
+    /**
+     * Position that the player respawns to
+     */
+    BlockPos respawnPos = null;
+
+    /**
+     * The level the player respawns to
+     */
+    ResourceKey<Level> respawnLevel;
+
     /**
      * Whether the bed is still valid
      * Needed to pass data between the death event and respawn event
      * TODO: Consider if this is still required
      */
     boolean bedReset;
-
-    /**
-     * Get the map of respawnPoints
-     * @return the map of respawn points
-     */
-    public Map<ResourceKey<Level>, BlockPos> getRespawnPoints() {
-        return respawnPoints;
-    }
-
-    /**
-     * Set the map of respawn points
-     * @param respawnPoints The new map of respawn points
-     */
-    public void setRespawnPoints(Map<ResourceKey<Level>, BlockPos> respawnPoints) {
-        this.respawnPoints = respawnPoints;
-    }
-
-    /**
-     * Get the respawn point for the level
-     * TODO: The stuff about switching to just one level and respawn point
-     * @param level The level key to get the spawn point of
-     * @return The player's spawn point for the given level
-     */
-    public BlockPos getRespawnForLevel(ResourceKey<Level> level) {
-        return this.respawnPoints.get(level);
-    }
-
-    /**
-     * Set the respawn point for the given level
-     * @param level The Level key to
-     * @param respawnPoint The new respawn point for the level
-     */
-    public void setRespawnPointForLevel(ResourceKey<Level> level, BlockPos respawnPoint) {
-        this.respawnPoints.put(level, respawnPoint);
-    }
 
     /**
      * Check if the bed has been reset
@@ -77,11 +57,56 @@ public class DatRespawn {
     }
 
     /**
+     * Get the respawn point for the player
+     * @return the respawn point for the player
+     */
+    public BlockPos getRespawnPos() {
+        return respawnPos;
+    }
+
+    /**
+     * Set the respawn point for the player
+     * @param respawnPos The respawn point for the player
+     */
+    public void setRespawnPos(BlockPos respawnPos) {
+        this.respawnPos = respawnPos;
+    }
+
+    /**
+     * Get the level the player repsawns to
+     * @return the level the player respawns to
+     */
+    public ResourceKey<Level> getRespawnLevel() {
+        return respawnLevel;
+    }
+
+    /**
+     * Set the level the player respawns to
+     * @param respawnLevel The level the player respawns to
+     */
+    public void setRespawnLevel(ResourceKey<Level> respawnLevel) {
+        this.respawnLevel = respawnLevel;
+    }
+
+    /**
      * Copy the data from the old DatRespawnObject
      * @param oldDatRespawn The old DatRespawn object to copy from
      */
     public void copyFrom(DatRespawn oldDatRespawn) {
-        respawnPoints = new HashMap<>(oldDatRespawn.respawnPoints);
+        respawnPos = oldDatRespawn.respawnPos;
+        respawnLevel = oldDatRespawn.respawnLevel;
         bedReset = oldDatRespawn.bedReset;
+    }
+
+    /**
+     * Generates a random coordinate for the level to use as the player's spawn
+     * @param level The level the spawn is in
+     * @return A random position on the surface for the player to spawn at
+     */
+    public static BlockPos generateRandomCoordinate(ServerLevel level){
+        int x = random.nextInt(radius * 2) - radius;
+        int z = random.nextInt(radius * 2) - radius;
+
+        return level.findClosestBiome3d((biomeHolder -> true), new BlockPos(x, 50, z), 6400, 32, 64).getFirst();
     }
 }

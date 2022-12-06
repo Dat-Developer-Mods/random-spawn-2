@@ -24,6 +24,7 @@ public class CapabilityEvents {
         event.addCapability(RESPAWN_CAPABILITY, new RespawnProvider());
     }
 
+    @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
         if (!event.isWasDeath()) return;
 
