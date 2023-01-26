@@ -3,6 +3,7 @@ package com.datdeveloper.randomspawn2.events;
 import com.datdeveloper.randomspawn2.Randomspawn2;
 import com.datdeveloper.randomspawn2.capability.RespawnProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -16,7 +17,7 @@ public class CapabilityEvents {
 
     @SubscribeEvent
     public static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-        if (!(event.getObject() instanceof Player player)) return;
+        if (!(event.getObject() instanceof ServerPlayer player)) return;
 
         if (player.getCapability(RespawnProvider.RESPAWN_HANDLER).isPresent()) return;
 
