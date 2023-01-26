@@ -28,10 +28,12 @@ public class CapabilityEvents {
     public static void onClone(PlayerEvent.Clone event) {
         if (!event.isWasDeath()) return;
 
+        event.getOriginal().reviveCaps();
         event.getOriginal().getCapability(RespawnProvider.RESPAWN_HANDLER).ifPresent(old -> {
             event.getEntity().getCapability(RespawnProvider.RESPAWN_HANDLER).ifPresent(newStore -> {
                 newStore.copyFrom(old);
             });
         });
+        event.getOriginal().invalidateCaps();
     }
 }
