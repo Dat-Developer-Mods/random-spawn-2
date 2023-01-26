@@ -33,7 +33,7 @@ public class RespawnProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap) {
-        if (cap == RESPAWN_HANDLER)  {
+        if (cap.equals(RESPAWN_HANDLER))  {
             return opt.cast();
         }
         return LazyOptional.empty();
